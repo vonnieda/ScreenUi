@@ -124,6 +124,10 @@ Container::~Container() {
 }
 
 void Container::update(Screen *screen) {
+  if (!firstUpdateCompleted_) {
+    offsetChildren(0, y_);
+    firstUpdateCompleted_ = true;
+  }
   for (int i = 0; i < componentCount_; i++) {
     components_[i]->update(screen);
   }
@@ -155,8 +159,31 @@ void Container::add(Component *component, int8_t x, int8_t y) {
     componentsLength_ = newComponentsLength;
   }
   components_[componentCount_++] = component;
+  if (firstUpdateCompleted_) {
+    // TODO: if the first update has already completed we need to update
+    // incoming components locations as they are added
+  }
   component->setLocation(x, y);
   component->repaint();
+}
+
+void Container::offsetChildren(int x, int y) {
+  for (int i = 0; i < componentCount_; i++) {
+    Component *c = components_[i];
+    /*
+    Serial.print("Moving ");
+    Serial.print(c->description());
+    Serial.print(" from ");
+    Serial.print(c->x(), DEC);
+    Serial.print(", ");
+    Serial.print(c->y(), DEC);
+    Serial.print(" to ");
+    Serial.print(c->x() + x, DEC);
+    Serial.print(", ");
+    Serial.println(c->y() + y, DEC);
+    */
+    c->setLocation(c->x() + x, c->y() + y);
+  }
 }
 
 Component *Container::nextFocusHolder(Component *focusHolder, bool reverse) {
@@ -437,45 +464,11 @@ ScrollContainer::~ScrollContainer() {
   free(clearLine);
 }
 
-void ScrollContainer::add(Component *component, int8_t x, int8_t y) {
-  Container::add(component, x, y);
-  if (firstUpdateCompleted_) {
-    // TODO: if the first update has already completed we need to update
-    // incoming components locations as they are added
-  }
-}
-
 bool ScrollContainer::dirty() {
   if (Container::dirty()) {
     return true;
   }
   return scrollNeeded();
-}
-
-void ScrollContainer::update(Screen *screen) {
-  if (!firstUpdateCompleted_) {
-    offsetChildren(0, y_);
-    firstUpdateCompleted_ = true;
-  }
-}
-
-void ScrollContainer::offsetChildren(int x, int y) {
-  for (int i = 0; i < componentCount_; i++) {
-    Component *c = components_[i];
-    /*
-    Serial.print("Moving ");
-    Serial.print(c->description());
-    Serial.print(" from ");
-    Serial.print(c->x(), DEC);
-    Serial.print(", ");
-    Serial.print(c->y(), DEC);
-    Serial.print(" to ");
-    Serial.print(c->x() + x, DEC);
-    Serial.print(", ");
-    Serial.println(c->y() + y, DEC);
-    */
-    c->setLocation(c->x() + x, c->y() + y);
-  }
 }
 
 bool ScrollContainer::scrollNeeded() {

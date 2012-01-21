@@ -110,10 +110,12 @@ class Container : public Component {
   protected:
     Component *nextFocusHolder(Component *focusHolder, bool reverse);
     Component *nextFocusHolder(Component *focusHolder, bool reverse, bool *focusHolderFound);
+    void offsetChildren(int x, int y);
 
     Component **components_;
     uint8_t componentsLength_;
     uint8_t componentCount_;
+    bool firstUpdateCompleted_;
 };
 
 // The main entry point into the ScreenUi system. A Screen instance represents
@@ -280,8 +282,6 @@ class ScrollContainer : public Container {
     // the tree to find it.
     ScrollContainer(Screen *screen, uint8_t width, uint8_t height);
     ~ScrollContainer();
-    virtual void update(Screen *screen);
-    virtual void add(Component *component, int8_t x, int8_t y);
     virtual void paint(Screen *screen);
     virtual bool dirty();
     #ifdef SCREENUI_DEBUG
@@ -289,12 +289,10 @@ class ScrollContainer : public Container {
     #endif
   private:
     bool scrollNeeded();
-    void offsetChildren(int x, int y);
   
     Component *lastFocusHolder_;
     Screen *screen_;
     char *clearLine;
-    bool firstUpdateCompleted_;
 };
 
 // A specialization of ScrollContainer that contains only Buttons and provides
