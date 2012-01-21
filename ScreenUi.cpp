@@ -452,6 +452,26 @@ bool Input::handleInputEvent(int x, int y, bool selected, bool cancelled) {
   return captured_;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// IntegerInput
+////////////////////////////////////////////////////////////////////////////////
+IntegerInput::IntegerInput(long value, unsigned char width, unsigned char base) : Input(NULL) {
+  signed_ = true;
+  base_ = base;
+  if (!width) {
+    // count the digits
+  }
+}
+
+IntegerInput::IntegerInput(unsigned long value, unsigned char width, unsigned char base) : Input(NULL) {
+  signed_ = false;
+  base_ = base;
+  if (!width) {
+    // count the digits
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // ScrollContainer
 ////////////////////////////////////////////////////////////////////////////////
@@ -540,6 +560,19 @@ void ScrollContainer::paint(Screen *screen) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// CharSet
+////////////////////////////////////////////////////////////////////////////////
+
+int CharSet::indexOf(unsigned char ch) {
+  for (int i = 0; i < size(); i++) {
+    if (charAt(i) == ch) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // RangeCharSet
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -559,16 +592,6 @@ RangeCharSet::~RangeCharSet() {
   free(ranges_);
 }
 
-// TODO: move to CharSet
-int RangeCharSet::indexOf(unsigned char ch) {
-  for (int i = 0; i < size(); i++) {
-    if (charAt(i) == ch) {
-      return i;
-    }
-  }
-  return -1;
-}
- 
 int RangeCharSet::charAt(int index) {
   // determine which range the index falls within by iterating the ranges
   // and then use that plus the index to determine the character

@@ -39,7 +39,7 @@ class CharSet {
     virtual bool contains(unsigned char ch) { return indexOf(ch) != -1; }
     // Returns the index in the character set for the given character.
     // Return -1 if the character is not part of the character set.
-    virtual int indexOf(unsigned char ch) = 0;
+    virtual int indexOf(unsigned char ch);
     // Returns the character at the given index for the character set.
     // Return -1 if the index is not within the range of the character set.
     virtual int charAt(int index) = 0;
@@ -54,7 +54,6 @@ class RangeCharSet : public CharSet {
   public:
     RangeCharSet(int rangeCount, ...);
     ~RangeCharSet();
-    virtual int indexOf(unsigned char ch);
     virtual int charAt(int index);
     virtual unsigned char size();
   private:
@@ -206,6 +205,7 @@ class Screen : public Container {
 class Label : public Component {
   public:
     Label(const char *text);
+    virtual const char *text() { return (const char *) text_; }
     virtual void setText(const char *text);
     virtual void paint(Screen *screen);
     #ifdef SCREENUI_DEBUG
@@ -292,12 +292,27 @@ class Input : public Label {
     CharSet *charSet_;
 };
 		
-// allows input of a floating point number.
+// A Component that accepts input of a floating or fixed point decimal
+// number. 
 class DecimalInput : public Input {
 };
 
-// allows input of an integer number with a certain base.
+// A Component that accepts input of an integer value with a given base.
 class IntegerInput : public Input {
+  public:
+    // Create a signed IntegerInput with the given value, width and base.
+    // If width is 0 the width will be determined by the number of digits in
+    // the incoming value, with one additional space for the negative. 
+    // If base is not specified, the default is base 10.
+    IntegerInput(long value, unsigned char width = 0, unsigned char base = 10);
+    // Create a signed IntegerInput with the given value, width and base.
+    // If width is 0 the width will be determined by the number of digits in
+    // the incoming value.
+    // If base is not specified, the default is base 10.
+    IntegerInput(unsigned long value, unsigned char width = 0, unsigned char base = 10);
+  private:
+    bool signed_;
+    unsigned char base_;
 };
 
 // Component that allows the user to enter a time with up to three fields
