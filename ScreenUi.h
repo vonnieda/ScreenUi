@@ -31,6 +31,40 @@
 
 class Screen;
 
+// Represents a set of characters that can be mapped to a continuous sequence
+// of integers starting with 0. 
+class CharSet {
+  public:
+    // Returns true if the character set contains the given character.
+    virtual bool contains(unsigned char ch) { return indexOf(ch) != -1; }
+    // Returns the index in the character set for the given character.
+    // Return -1 if the character is not part of the character set.
+    virtual int indexOf(unsigned char ch) = 0;
+    // Returns the character at the given index for the character set.
+    // Return -1 if the index is not within the range of the character set.
+    virtual int charAt(int index) = 0;
+    // Returns the length of the character set. This method can be used
+    // to determine what the maximum index for charAt() will be.
+    virtual unsigned char size() = 0;
+};
+
+// An implementation of CharSet that uses several ranges to determine it's
+// full character set
+class RangeCharSet : public CharSet {
+  public:
+    RangeCharSet(int rangeCount, ...);
+    ~RangeCharSet();
+    virtual int indexOf(unsigned char ch);
+    virtual int charAt(int index);
+    virtual unsigned char size();
+  private:
+    unsigned char rangeCount_;
+    unsigned char *ranges_;
+};
+
+extern RangeCharSet defaultCharSet;
+extern RangeCharSet floatingPointCharSet;
+
 class Component {
   public:
     Component() { x_ = y_ = width_ = height_ = 0; }
@@ -250,9 +284,12 @@ class Input : public Label {
     #ifdef SCREENUI_DEBUG
     virtual char *description() { return "Input"; }
     #endif
+    void setCharSet(CharSet *charSet) { charSet_ = charSet; }
+    CharSet *charSet() { return charSet_; }
   protected:
     int8_t position_;
     bool selecting_;
+    CharSet *charSet_;
 };
 		
 // allows input of a floating point number.

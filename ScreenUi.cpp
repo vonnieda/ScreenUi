@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #ifdef SCREENUI_DEBUG
 #include <WProgram.h>
@@ -71,6 +72,9 @@ void Screen::update() {
       }
       else if (x || y) {
         // TODO: Make axis x or y configurable.
+        // TODO: consider making the last widget in the screen the end of focus,
+        // so that you don't cycle back to the top but instead lock at the end
+        // and vice-verse. Maybe make this configurable.
         if (y > 0) {
           focusHolder_ = nextFocusHolder(focusHolder_, false);
           if (!focusHolder_) {
@@ -387,6 +391,7 @@ bool List::handleInputEvent(int x, int y, bool selected, bool cancelled) {
 Input::Input(char *text) : Label((const char*) text) {
   position_ = 0;
   selecting_ = false;
+  charSet_ = &defaultCharSet;
 }
 
 void Input::setText(char *text) {
@@ -412,10 +417,10 @@ bool Input::handleInputEvent(int x, int y, bool selected, bool cancelled) {
       // TODO: replace this with a selectable character set that makes more
       // sense
       if (y < 0) {
-        text_[position_] = max(text_[position_] + y, ' ');
+        text_[position_] = charSet_->charAt(max(charSet_->indexOf(text_[position_]) + y, 0));
       }
       else {
-        text_[position_] = min(text_[position_] + y, '}');
+        text_[position_] = charSet_->charAt(min(charSet_->indexOf(text_[position_]) + y, charSet_->size() - 1));
       }
     }
     // Otherwise we are changing the position. If the position is moving before
@@ -534,3 +539,75 @@ void ScrollContainer::paint(Screen *screen) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// RangeCharSet
+////////////////////////////////////////////////////////////////////////////////
+
+RangeCharSet::RangeCharSet(int rangeCount, ...) {
+  rangeCount_ = (unsigned char) rangeCount;
+  ranges_ = (unsigned char *) malloc(sizeof(unsigned char) * rangeCount * 2);
+  va_list argp;
+	va_start(argp, rangeCount);
+	for (int i = 0; i < rangeCount; i++) {
+  	ranges_[i * 2] = (unsigned char) va_arg(argp, int);
+  	ranges_[i * 2 + 1] = (unsigned char) va_arg(argp, int);
+  }
+	va_end(argp);
+}
+
+RangeCharSet::~RangeCharSet() {
+  free(ranges_);
+}
+
+// TODO: move to CharSet
+int RangeCharSet::indexOf(unsigned char ch) {
+  for (int i = 0; i < size(); i++) {
+    if (charAt(i) == ch) {
+      return i;
+    }
+  }
+  return -1;
+}
+ 
+int RangeCharSet::charAt(int index) {
+  // determine which range the index falls within by iterating the ranges
+  // and then use that plus the index to determine the character
+  int currentIndex = 0;
+  for (int i = 0; i < rangeCount_; i++) {
+    if (index >= currentIndex && index <= currentIndex + (ranges_[i * 2 + 1] - ranges_[i * 2])) {
+      unsigned char ch = (unsigned char) (ranges_[i * 2] + (index - currentIndex));
+      return (int) ch;
+    }
+    else {
+      currentIndex += (ranges_[i * 2 + 1] - ranges_[i * 2]) + 1;
+    }
+  }
+  return -1;
+}
+
+unsigned char RangeCharSet::size() {
+  unsigned char size = 0;
+  for (int i = 0; i < rangeCount_; i++) {
+    size += (ranges_[i * 2 + 1] - ranges_[i * 2]) + 1;
+  }
+  return size;
+}
+
+RangeCharSet defaultCharSet(8,
+  32, 32,   // space
+  65, 90,   // capital letters
+  97, 122,  // lowercase letters
+  48, 57,   // digits
+  33, 47,   // special chars
+  58, 64,   // special chars
+  91, 96,   // special chars
+  123, 126  // special chars
+  );
+  
+RangeCharSet floatingPointCharSet(4,
+  32, 32,   // space
+  48, 57,   // digits
+  46, 46,   // period
+  45, 45    // negative
+  );
+  
