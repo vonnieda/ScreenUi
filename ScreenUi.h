@@ -53,7 +53,7 @@ class CharSet {
 class RangeCharSet : public CharSet {
   public:
     RangeCharSet(int rangeCount, ...);
-    ~RangeCharSet();
+    virtual ~RangeCharSet();
     virtual int charAt(int index);
     virtual unsigned char size();
   private:
@@ -125,7 +125,7 @@ class Component {
 class Container : public Component {
   public:
     Container();
-    ~Container();
+    virtual ~Container();
     virtual void add(Component *component, int8_t x, int8_t y);
     virtual void update(Screen *screen);
     // Paints any dirty child components.
@@ -258,6 +258,7 @@ class Checkbox : public Label {
 class List : public Label {
   public:
     List(uint8_t maxItems);
+    virtual ~List();
     void addItem(const char *item);
     const char *selectedItem() { return items_[selectedIndex_]; }
     uint8_t selectedIndex() { return selectedIndex_; }
@@ -333,7 +334,7 @@ class ScrollContainer : public Container {
     // better than adding this property to every other object or walking
     // the tree to find it.
     ScrollContainer(Screen *screen, uint8_t width, uint8_t height);
-    ~ScrollContainer();
+    virtual ~ScrollContainer();
     virtual void paint(Screen *screen);
     virtual bool dirty();
     #ifdef SCREENUI_DEBUG

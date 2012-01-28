@@ -124,7 +124,9 @@ Container::Container() {
 }
 
 Container::~Container() {
-  free(components_);
+  if (components_) {
+    free(components_);
+  }
 }
 
 void Container::update(Screen *screen) {
@@ -154,11 +156,7 @@ void Container::repaint() {
 void Container::add(Component *component, int8_t x, int8_t y) {
   if (!components_ || componentsLength_ <= componentCount_) {
     uint8_t newComponentsLength = (componentsLength_ * 2) + 1;
-    Component** newComponents = (Component**) malloc(newComponentsLength * sizeof(Component*));
-    for (int i = 0; i < componentCount_; i++) {
-      newComponents[i] = components_[i];
-    }
-    free(components_);
+    Component** newComponents = (Component**) realloc(newComponentsLength * sizeof(Component*));
     components_ = newComponents;
     componentsLength_ = newComponentsLength;
   }
@@ -352,6 +350,10 @@ List::List(uint8_t maxItems) : Label(NULL) {
   itemCount_ = 0;
   selectedIndex_ = 0;
   captured_ = false;
+}
+
+List::~List() {
+  free(items_);
 }
 
 void List::addItem(const char *item) {
