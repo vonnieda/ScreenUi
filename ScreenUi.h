@@ -274,6 +274,23 @@ class List : public Label {
     uint8_t selectedIndex_;
 };
 
+// A Component that allows the user to scroll through a range of Integers
+// or floats. 
+class Spinner : public Label {
+  public:
+    Spinner(int value, int low, int high, int increment, bool rollover);
+    int intValue();
+    virtual bool acceptsFocus() { return true; }
+    virtual bool handleInputEvent(int x, int y, bool selected, bool cancelled);
+    #ifdef SCREENUI_DEBUG
+    virtual char *description() { return "Spinner"; }
+    #endif
+  private:
+    char buffer_[10];
+    int value_, low_, high_, increment_;
+    bool rollover_;
+};
+
 // allows text input. Each character can be clicked to scroll through the alphabet.
 class Input : public Label {
   public:

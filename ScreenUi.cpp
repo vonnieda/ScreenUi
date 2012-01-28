@@ -387,6 +387,43 @@ bool List::handleInputEvent(int x, int y, bool selected, bool cancelled) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Spinner
+////////////////////////////////////////////////////////////////////////////////
+
+Spinner::Spinner(int value, int low, int high, int increment, bool rollover) : Label(NULL) {
+  value_ = value;
+  low_ = low;
+  high_ = high;
+  increment_ = increment;
+  rollover_ = rollover;
+  sprintf(buffer_, "%d", value_);
+  setText(buffer_);
+}
+
+int Spinner::intValue() {
+  return value_;
+}
+
+bool Spinner::handleInputEvent(int x, int y, bool selected, bool cancelled) {
+  if (captured_ && y) {
+    value_ += (y * increment_);
+    if (value_ < low_) {
+      value_ = rollover_ ? high_ : low_;
+    }
+    else if (value_ > high_) {
+      value_ = rollover_ ? low_ : high_;
+    }
+    sprintf(buffer_, "%d", value_);
+    setText(buffer_);
+    repaint();
+  }
+  if (selected) {
+    captured_ = !captured_;
+    repaint();
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Input
 ////////////////////////////////////////////////////////////////////////////////
 
