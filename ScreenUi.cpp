@@ -20,14 +20,17 @@
  */
 
 #include <ScreenUi.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 
 #ifdef SCREENUI_DEBUG
 #include <WProgram.h>
 #endif
+
+void* operator new(size_t size) { return malloc(size); }
+void operator delete(void* ptr) { free(ptr); }
 
 // TODO: Change to PROGMEM
 uint8_t charCheckmark[] =     {0,     // B00000
@@ -155,10 +158,8 @@ void Container::repaint() {
 
 void Container::add(Component *component, int8_t x, int8_t y) {
   if (!components_ || componentsLength_ <= componentCount_) {
-    uint8_t newComponentsLength = (componentsLength_ * 2) + 1;
-    Component** newComponents = (Component**) realloc(newComponentsLength * sizeof(Component*));
-    components_ = newComponents;
-    componentsLength_ = newComponentsLength;
+    componentsLength_ = (componentsLength_ * 2) + 1;
+    components_ = (Component**) realloc(components_, componentsLength_ * sizeof(Component*));
   }
   components_[componentCount_++] = component;
   if (firstUpdateCompleted_) {
