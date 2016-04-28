@@ -1,5 +1,7 @@
 ScreenUi makes it easy to build simple or complex character based user interfaces on small LCD displays like those commonly used with Arduinos. It offers a suite of widgets that you can use to build a screen and a set of simple ways to get data to and from the widgets. ScreenUi incorporates focus management, scrolling, text editing, input and output all in one easy to use library.
 
+Demonstration video: https://www.youtube.com/watch?v=fMjPy8N6kG0
+
 Here is a short Arduino sketch showing an example of how to use the library. Comments in the code explain how each piece works.
 
 ```
