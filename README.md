@@ -61,8 +61,6 @@ void loop() {
   // Create a new Screen with width 20, height 4.
   Screen screen(20, 4);
   
-  Label lbls[32];
-  
   // Some static text that will be at the top of the screen.
   Label titleLabel("RGB Settings");
   
